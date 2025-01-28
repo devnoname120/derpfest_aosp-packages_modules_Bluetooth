@@ -37,7 +37,7 @@
 #include "osi/include/osi.h"
 #include "stack/include/bt_hdr.h"
 
-#define A2DP_SBC_MAX_BITPOOL 53
+#define A2DP_SBC_MAX_BITPOOL 76
 
 using namespace bluetooth;
 
@@ -1000,7 +1000,7 @@ tA2DP_STATUS A2dpCodecConfigSbcBase::setCodecConfig(const uint8_t* p_peer_codec_
 
   // Try using the prefered peer codec config (if valid), instead of the peer
   // capability.
-  if (is_capability) {
+  if (is_capability && !is_source_) {
     if (A2DP_IsCodecValidSbc(ota_codec_peer_config_)) {
       status =
           A2DP_ParseInfoSbc(&peer_info_cie, ota_codec_peer_config_, false);
@@ -1291,7 +1291,8 @@ tA2DP_STATUS A2dpCodecConfigSbcBase::setCodecConfig(const uint8_t* p_peer_codec_
     result_config_cie.min_bitpool = peer_info_cie.min_bitpool;
   }
   result_config_cie.max_bitpool = p_a2dp_sbc_caps->max_bitpool;
-  if (result_config_cie.max_bitpool > peer_info_cie.max_bitpool) {
+  // Ignore remote peer sink max bitpool
+  if (0 && result_config_cie.max_bitpool > peer_info_cie.max_bitpool) {
     result_config_cie.max_bitpool = peer_info_cie.max_bitpool;
   }
   if (result_config_cie.min_bitpool > result_config_cie.max_bitpool) {

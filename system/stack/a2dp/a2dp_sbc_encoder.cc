@@ -40,14 +40,14 @@
 #define A2DP_SBC_ENCODER_INTERVAL_MS 20
 
 /* High quality quality setting @ 44.1 khz */
-#define A2DP_SBC_DEFAULT_BITRATE 328
+#define A2DP_SBC_DEFAULT_BITRATE 454
 
 #define A2DP_SBC_NON_EDR_MAX_RATE 229
 
 #define A2DP_SBC_MAX_PCM_ITER_NUM_PER_TICK 3
 
-#define A2DP_SBC_MAX_HQ_FRAME_SIZE_44_1 119
-#define A2DP_SBC_MAX_HQ_FRAME_SIZE_48 115
+#define A2DP_SBC_MAX_HQ_FRAME_SIZE_44_1 165
+#define A2DP_SBC_MAX_HQ_FRAME_SIZE_48 165
 
 /* Define the bitrate step when trying to match bitpool value */
 #define A2DP_SBC_BITRATE_STEP 5
@@ -739,11 +739,11 @@ static uint8_t calculate_max_frames_per_packet(void) {
 }
 
 static uint16_t a2dp_sbc_source_rate(bool is_peer_edr) {
-  uint16_t rate = A2DP_SBC_DEFAULT_BITRATE;
+  uint16_t rate = A2DP_SBC_DEFAULT_BITRATE; // 454
 
   /* restrict bitrate if a2dp link is non-edr */
   if (!is_peer_edr) {
-    rate = A2DP_SBC_NON_EDR_MAX_RATE;
+    rate = A2DP_SBC_NON_EDR_MAX_RATE; // 229 (unchanged)
     log::verbose("non-edr a2dp sink detected, restrict rate to {}", rate);
   }
 
