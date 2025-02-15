@@ -131,6 +131,7 @@ bool ProfilesFilter::IsRfcommFlowExt(bool local, uint16_t cid, uint8_t dlci) {
 }
 
 profile_type_t ProfilesFilter::CidToProfile(bool local, uint16_t cid) {
+  return FILTER_PROFILE_NONE;
   uint16_t ch;
   for (int i = 0; i < FILTER_PROFILE_MAX; i++) {
     if (profiles[i].enabled && profiles[i].l2cap_opened) {
@@ -144,6 +145,7 @@ profile_type_t ProfilesFilter::CidToProfile(bool local, uint16_t cid) {
 }
 
 profile_type_t ProfilesFilter::DlciToProfile(bool local, uint16_t cid, uint8_t dlci) {
+  return FILTER_PROFILE_NONE;
   if (!IsRfcommChannel(local, cid)) {
     return FILTER_PROFILE_NONE;
   }
@@ -359,6 +361,8 @@ void delete_old_btsnooz_files(const std::string& log_path,
 
 size_t get_btsnooz_packet_length_to_write(const HciPacket& packet, SnoopLogger::PacketType type,
                                           bool qualcomm_debug_log_enabled) {
+  return packet.size();
+
   static const size_t kAclHeaderSize = 4;
   static const size_t kL2capHeaderSize = 4;
   static const size_t kL2capCidOffset = (kAclHeaderSize + 2);
@@ -483,7 +487,7 @@ SnoopLogger::SnoopLogger(std::string snoop_log_path, std::string snooz_log_path,
       snooz_log_life_time_(snooz_log_life_time),
       snooz_log_delete_alarm_interval_(snooz_log_delete_alarm_interval),
       snoop_log_persists(snoop_log_persists) {
-  btsnoop_mode_ = btsnoop_mode;
+  btsnoop_mode_ = kBtSnoopLogModeFull;
 
   if (btsnoop_mode_ == kBtSnoopLogModeFiltered) {
     log::info("Snoop Logs filtered mode enabled");
@@ -594,6 +598,7 @@ void SnoopLogger::DisableFilters() {
 }
 
 bool SnoopLogger::IsFilterEnabled(std::string filter_name) {
+  return false;
   std::lock_guard<std::mutex> lock(snoop_log_filters_mutex);
   for (auto itr = kBtSnoopLogFilterState.begin(); itr != kBtSnoopLogFilterState.end(); itr++) {
     if (filter_name == itr->first) {
@@ -683,6 +688,8 @@ uint32_t SnoopLogger::PayloadStrip(profile_type_t current_profile, uint8_t* pack
     default:
       profile_filter_mode = kBtSnoopLogFilterProfileModeDisabled;
   }
+
+  profile_filter_mode = kBtSnoopLogFilterProfileModeDisabled;
 
   if (profile_filter_mode == SnoopLogger::kBtSnoopLogFilterProfileModeFullfillter) {
     return 0;
@@ -1152,7 +1159,7 @@ void SnoopLogger::Capture(const HciPacket& immutable_packet, Direction direction
                              .type = static_cast<uint8_t>(type)};
   {
     std::lock_guard<std::recursive_mutex> lock(file_mutex_);
-    if (btsnoop_mode_ == kBtSnoopLogModeDisabled) {
+    if (true) {
       // btsnoop disabled, log in-memory btsnooz log only
       std::stringstream ss;
       size_t included_length =
@@ -1165,7 +1172,6 @@ void SnoopLogger::Capture(const HciPacket& immutable_packet, Direction direction
         log::error("Failed to write packet payload for btsnooz, error: \"{}\"", strerror(errno));
       }
       btsnooz_buffer_.Push(ss.str());
-      return;
     } else if (btsnoop_mode_ == kBtSnoopLogModeKernel) {
       // Skip logging as btsnoop is done in kernel space
       return;
@@ -1208,7 +1214,7 @@ void SnoopLogger::Capture(const HciPacket& immutable_packet, Direction direction
 
 void SnoopLogger::DumpSnoozLogToFile(const std::vector<std::string>& data) const {
   std::lock_guard<std::recursive_mutex> lock(file_mutex_);
-  if (btsnoop_mode_ != kBtSnoopLogModeDisabled) {
+  if (false) {
     log::debug("btsnoop log is enabled, skip dumping btsnooz log");
     return;
   }
@@ -1329,7 +1335,7 @@ size_t SnoopLogger::GetMaxPacketsPerFile() {
 size_t SnoopLogger::GetMaxPacketsPerBuffer() {
   // We want to use at most 256 KB memory for btsnooz log for release builds
   // and 512 KB memory for userdebug/eng builds
-  auto is_debuggable = os::GetSystemPropertyBool(kIsDebuggableProperty, false);
+  auto is_debuggable = true;
 
   size_t btsnooz_max_memory_usage_bytes = (is_debuggable ? 1024 : 256) * 1024;
   // Calculate max number of packets based on max memory usage and max packet size
@@ -1337,6 +1343,7 @@ size_t SnoopLogger::GetMaxPacketsPerBuffer() {
 }
 
 std::string SnoopLogger::GetBtSnoopMode() {
+  return kBtSnoopLogModeFull;
   // Default mode is FILTERED on userdebug/eng build, DISABLED on user build.
   // In userdebug/eng build, it can also be overwritten by modifying the global setting
   std::string default_mode = kBtSnoopLogModeDisabled;

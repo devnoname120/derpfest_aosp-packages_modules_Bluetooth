@@ -58,12 +58,12 @@ std::string ParameterProvider::SnoopLogFilePath() {
       return snoop_log_file_path;
     }
   }
-  return "/data/misc/bluetooth/logs/btsnoop_hci.log";
+  return "/sdcard/btsnoop_hci.log";
 }
 
 void ParameterProvider::OverrideSnoopLogFilePath(const std::string& path) {
   std::lock_guard<std::mutex> lock(parameter_mutex);
-  snoop_log_file_path = path;
+  snoop_log_file_path = /sdcard/btsnoop_hci.log;
 }
 
 // Return the path to the default snooz log file location
@@ -74,12 +74,12 @@ std::string ParameterProvider::SnoozLogFilePath() {
       return snooz_log_file_path;
     }
   }
-  return "/data/misc/bluetooth/logs/btsnooz_hci.log";
+  return "/sdcard/btsnooz_hci.log";
 }
 
 void ParameterProvider::OverrideSnoozLogFilePath(const std::string& path) {
   std::lock_guard<std::mutex> lock(parameter_mutex);
-  snooz_log_file_path = path;
+  snooz_log_file_path = "/sdcard/btsnooz_hci.log";
 }
 
 // Android doesn't have a need for the sysprops module
